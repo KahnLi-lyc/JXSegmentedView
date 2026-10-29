@@ -14,7 +14,7 @@ open class JXSegmentedTitleAttributeDataSource: JXSegmentedBaseDataSource {
     /// 选中时的富文本，可选。如果要使用确保count与attributedTitles一致。
     open var selectedAttributedTitles: [NSAttributedString]?
     /// 如果将JXSegmentedView嵌套进UITableView的cell，每次重用的时候，JXSegmentedView进行reloadData时，会重新计算所有的title宽度。所以该应用场景，需要UITableView的cellModel缓存titles的文字宽度，再通过该闭包方法返回给JXSegmentedView。
-    open var widthForTitleClosure: ((NSAttributedString)->(CGFloat))?
+    open var widthForTitleClosure: (@MainActor (NSAttributedString)->CGFloat)?
     /// title的numberOfLines
     open var titleNumberOfLines: Int = 2
 

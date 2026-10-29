@@ -8,6 +8,7 @@
 
 import UIKit
 
+@MainActor
 open class JXSegmentedTitleCell: JXSegmentedBaseCell {
     public let titleLabel = UILabel()
     public let maskTitleLabel = UILabel()
