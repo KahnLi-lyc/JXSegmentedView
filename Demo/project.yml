@@ -1,0 +1,66 @@
+name: JXSegmentedViewDemo
+options:
+  minimumXcodeGenVersion: 2.46.0
+  deploymentTarget:
+    iOS: '16.0'
+packages:
+  JXSegmentedView:
+    path: ..
+settings:
+  base:
+    SWIFT_VERSION: '6.0'
+    SWIFT_STRICT_CONCURRENCY: complete
+    IPHONEOS_DEPLOYMENT_TARGET: '16.0'
+    TARGETED_DEVICE_FAMILY: '1,2'
+    CODE_SIGNING_ALLOWED: NO
+    GENERATE_INFOPLIST_FILE: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    CURRENT_PROJECT_VERSION: 1
+    MARKETING_VERSION: '1.0'
+targets:
+  JXSegmentedViewDemo:
+    type: application
+    platform: iOS
+    sources: [App]
+    resources: [Resources]
+    dependencies:
+      - package: JXSegmentedView
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.jxsegmented.demo
+        INFOPLIST_KEY_CFBundleDisplayName: Segmented Lab
+        INFOPLIST_KEY_LSRequiresIPhoneOS: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
+  JXSegmentedViewDemoTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [Tests]
+    dependencies:
+      - target: JXSegmentedViewDemo
+      - package: JXSegmentedView
+    settings:
+      base:
+        IPHONEOS_DEPLOYMENT_TARGET: '17.0'
+        PRODUCT_BUNDLE_IDENTIFIER: org.jxsegmented.demo.tests
+  JXSegmentedViewDemoUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [UITests]
+    dependencies:
+      - target: JXSegmentedViewDemo
+    settings:
+      base:
+        IPHONEOS_DEPLOYMENT_TARGET: '17.0'
+        PRODUCT_BUNDLE_IDENTIFIER: org.jxsegmented.demo.uitests
+schemes:
+  JXSegmentedViewDemo:
+    build:
+      targets:
+        JXSegmentedViewDemo: all
+    test:
+      gatherCoverageData: true
+      targets:
+        - JXSegmentedViewDemoTests
+        - JXSegmentedViewDemoUITests
