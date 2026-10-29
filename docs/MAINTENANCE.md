@@ -1,11 +1,12 @@
-# Club Circle SwiftPM maintenance
+# Independent SwiftPM maintenance
 
 - Fork: https://github.com/KahnLi-lyc/JXSegmentedView
-- Permanent maintenance branch: `spm`.
+- Active maintenance and default branch: `master`.
+- Frozen compatibility branch: `spm`; existing pinned commits remain valid.
 - Upstream: https://github.com/pujiaxin33/JXSegmentedView
 - Exact base: `fbbf965d7396bd99ac1ce88a80b6c950b85313f6` (1.4.1).
 - Original MIT license, author notices, public API, source directories, examples,
-  and master history are preserved. No upstream tag is moved or replaced.
+  and Git history are preserved. No upstream tag is moved or replaced.
 
 ## Patches
 
@@ -42,3 +43,11 @@ press/cancel, unselected highlight, scroll interpolation, active selected
 animation, reuse, mask colors/layers, the gradient cell, Chinese/Arabic text,
 per-index font configuration, nil selected fonts, closure/fixed width/zoom, and
 the packaged privacy manifest. See `VALIDATION.md` for recorded baseline/results.
+
+## Branch maintenance
+
+`master` is the active default branch. Work on `feature/*` or `fix/*`, run the
+package regressions, and merge into `master` before updating consumers.
+The one-time history reconciliation keeps the tested `spm` source tree; it does
+not adopt later upstream changes merely because their commits are ancestors.
+See [branching](BRANCHING.md) and the explicit [upstream review ledger](UPSTREAM_REVIEW.md).

@@ -1,8 +1,10 @@
-> **Club Circle maintenance fork (`spm`)** — based on upstream
+> **Independently maintained SwiftPM fork (`master`)** — based on upstream
 > [pujiaxin33/JXSegmentedView 1.4.1](https://github.com/pujiaxin33/JXSegmentedView/tree/fbbf965d7396bd99ac1ce88a80b6c950b85313f6).
 > MIT license and upstream source organization are retained. Local patches fix
 > UIKit title state color restoration and automatic normal/selected font widths.
-> See [maintenance notes](docs/MAINTENANCE.md) for provenance and Simulator tests.
+> See [maintenance notes](docs/MAINTENANCE.md) for provenance and Simulator tests,
+> and [branching guide](docs/BRANCHING.md) for development and upstream updates.
+> Pin a reviewed full commit from `master`; `spm` remains a frozen compatibility branch.
 
 <div align=center><img src="Example/JXSegmentedViewExample/Image/JXSegmentedViewSmall.png" width="467" height="84" /></div>
 

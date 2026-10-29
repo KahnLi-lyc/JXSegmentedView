@@ -57,3 +57,32 @@ Evidence: `/tmp/cc-jxseg-clean.log` and
 `/tmp/cc-jxseg-clean-derived/Logs/Test/Test-JXSegmentedView-2026.10.29_11-05-02-+0800.xcresult`.
 The ordinary upstream workspace file is tracked, but the fallback also supports
 exports that omit it. The script never replaces an existing workspace.
+
+## Master maintenance migration — 2026-10-29
+
+The migration worktree retains the tested source tree from `f92aa529378f7d5ef3f39e5ac226864f9d2c6094`.
+`Sources`, `Tests`, `Package.swift`, `LICENSE`, and `scripts/test-ios.sh` are byte-identical
+to that revision. Only README and maintenance documents change.
+The old master `49d8b0755f4877febd3251471e3347880f785c96` is retained as the second parent of a
+one-time history reconciliation; its later upstream source changes are not adopted.
+See [the review ledger](UPSTREAM_REVIEW.md).
+
+A dedicated iPhone 17 Pro / iOS 27 Simulator `A2FF0624-DBA8-48E2-B504-8547CF5C1783` ran the
+actual SwiftPM package tests with Xcode 27.1 / Swift 6.4:
+
+```sh
+xcodebuild -jobs 2 -workspace .swiftpm/xcode/package.xcworkspace -scheme JXSegmentedView -destination platform=iOS\ Simulator,id=A2FF0624-DBA8-48E2-B504-8547CF5C1783 -parallel-testing-enabled NO -collect-test-diagnostics never test
+```
+
+- **12 tests, 0 failures**, `TEST SUCCEEDED`, exit 0.
+- `swift package dump-package`, shell syntax, privacy manifest lint, Markdown local
+  links, unchanged runtime-tree comparison and `git diff --check`: pass.
+- The existing upstream `automaticallyAdjustsScrollViewInsets` deprecation and Xcode test sysroot / AppIntents metadata diagnostics were recorded separately. No warning was suppressed or source modified to silence it.
+- Test log: `/var/folders/99/z2m_xqws3mq2jll1t05vm0fc0000gn/T/jx-master-migration-20261029-1ftt_bvl/JXSegmentedView-test.log`.
+- Result bundle: `/var/folders/99/z2m_xqws3mq2jll1t05vm0fc0000gn/T/jx-master-migration-20261029-1ftt_bvl/JXSegmentedView.xcresult`.
+
+The command used a fresh external DerivedData directory and result bundle, with
+`-jobs 2` to limit machine load. Only verbose failure diagnostic collection was
+disabled; test assertions and package compilation were unchanged. Existing
+consumer revisions remain pinned; this is not a Swift 6 language-mode migration
+or a new physical-device / consumer-application validation.
