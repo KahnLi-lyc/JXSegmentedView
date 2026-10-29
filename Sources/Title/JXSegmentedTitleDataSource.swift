@@ -84,12 +84,18 @@ open class JXSegmentedTitleDataSource: JXSegmentedBaseDataSource {
     }
 
     open func widthForTitle(_ title: String, _ index: Int) -> CGFloat {
-        if widthForTitleClosure != nil {
-            return widthForTitleClosure!(title)
-        }else {
-            let textWidth = NSString(string: title).boundingRect(with: CGSize(width: CGFloat.infinity, height: CGFloat.infinity), options: [.usesFontLeading, .usesLineFragmentOrigin], attributes: [NSAttributedString.Key.font : innerTitleNormalFont(at: index)], context: nil).size.width
-            return CGFloat(ceilf(Float(textWidth)))
+        if let widthForTitleClosure = widthForTitleClosure {
+            return widthForTitleClosure(title)
         }
+        let normalFont = innerTitleNormalFont(at: index)
+        let selectedFont = innerTitleSelectedFont(at: index) ?? normalFont
+        let size = CGSize(width: CGFloat.infinity, height: CGFloat.infinity)
+        let options: NSStringDrawingOptions = [.usesFontLeading, .usesLineFragmentOrigin]
+        let normalWidth = NSString(string: title).boundingRect(with: size, options: options, attributes: [.font: normalFont], context: nil).width
+        let selectedWidth = NSString(string: title).boundingRect(with: size, options: options, attributes: [.font: selectedFont], context: nil).width
+        // Reserve both states so selecting a larger/bolder font does not clip.
+        // Zoom scaling remains in the existing item/content width paths.
+        return ceil(max(normalWidth, selectedWidth))
     }
 
     /// 因为该方法会被频繁调用，所以应该在`preferredRefreshItemModel( _ itemModel: JXSegmentedBaseItemModel, at index: Int, selectedIndex: Int)`方法里面，根据数据源计算好文字宽度，然后缓存起来。该方法直接使用已经计算好的文字宽度即可。

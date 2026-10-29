@@ -200,10 +200,14 @@ open class JXSegmentedTitleCell: JXSegmentedBaseCell {
     }
     
     override func setSelectedStyle(isSelected: Bool) {
-        if isSelected {
-            self.titleLabel.textColor = (self.itemModel as? JXSegmentedTitleItemModel)?.titleSelectedColor
-        } else {
-            self.titleLabel.textColor = (self.itemModel as? JXSegmentedTitleItemModel)?.titleNormalColor
+        // UIKit selection/highlight notifications are independent of segmented selection.
+        // The model owns the rendered color, including scroll gradients. Mask and
+        // selected animations already manage their own label colors in reloadData.
+        guard let model = itemModel as? JXSegmentedTitleItemModel,
+              !model.isTitleMaskEnabled,
+              !model.isTransitionAnimating else {
+            return
         }
+        titleLabel.textColor = model.titleCurrentColor
     }
 }
