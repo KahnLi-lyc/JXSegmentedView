@@ -1,0 +1,89 @@
+name: Swift
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  ios:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    env:
+      XCODEBUILD_JOBS: 2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Record hosted runner toolchain
+        run: |
+          mkdir -p "$RUNNER_TEMP/diagnostics"
+          xcodebuild -version | tee "$RUNNER_TEMP/diagnostics/xcode-version.log"
+          xcrun swift --version | tee "$RUNNER_TEMP/diagnostics/swift-version.log"
+          xcrun simctl list runtimes -j > "$RUNNER_TEMP/diagnostics/runtimes.json"
+      - name: Create a dedicated Simulator
+        id: simulator
+        shell: bash
+        run: |
+          simulator_id="$(python3 - <<'PYTHON'
+          import json
+          import subprocess
+          def simctl(*args):
+              return subprocess.check_output(["xcrun", "simctl", *args], text=True)
+          runtimes = json.loads(simctl("list", "runtimes", "-j"))["runtimes"]
+          ios = [r for r in runtimes if r.get("isAvailable") and ".iOS-" in r["identifier"]]
+          runtime = max(ios, key=lambda r: tuple(map(int, r["version"].split("."))))
+          devices = json.loads(simctl("list", "devices", "available", "-j"))["devices"].get(runtime["identifier"], [])
+          phones = [d for d in devices if d["name"].startswith("iPhone") and d.get("deviceTypeIdentifier")]
+          if phones:
+              device_type = phones[0]["deviceTypeIdentifier"]
+          else:
+              types = json.loads(simctl("list", "devicetypes", "-j"))["devicetypes"]
+              device_type = next(t["identifier"] for t in reversed(types) if t["name"].startswith("iPhone"))
+          print(simctl("create", "JXSegmentedView-CI", device_type, runtime["identifier"]).strip())
+          PYTHON
+          )"
+          echo "id=$simulator_id" >> "$GITHUB_OUTPUT"
+          xcrun simctl boot "$simulator_id"
+          xcrun simctl bootstatus "$simulator_id" -b
+      - name: Test Swift 6 library with complete concurrency checks
+        shell: bash
+        run: |
+          set -o pipefail
+          scripts/test-ios.sh '${{ steps.simulator.outputs.id }}' \
+            "$RUNNER_TEMP/Library-DerivedData" -- \
+            -resultBundlePath "$RUNNER_TEMP/diagnostics/Library.xcresult" \
+            SWIFT_STRICT_CONCURRENCY=complete \
+            2>&1 | tee "$RUNNER_TEMP/diagnostics/library.log"
+      - name: Compile Swift 5 and Swift 6 public consumers
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -o pipefail
+          scripts/check-consumer.sh "$RUNNER_TEMP/diagnostics/Consumers" \
+            2>&1 | tee "$RUNNER_TEMP/diagnostics/consumers.log"
+      - name: Reject concurrency warning diagnostics
+        if: always()
+        shell: bash
+        run: |
+          shopt -s nullglob
+          logs=("$RUNNER_TEMP/diagnostics/"*.log "$RUNNER_TEMP/diagnostics/Consumers/"*.log)
+          if [[ ${#logs[@]} -gt 0 ]]; then
+            scripts/check-concurrency-diagnostics.sh "${logs[@]}"
+          fi
+      - name: Delete dedicated Simulator
+        if: ${{ always() && steps.simulator.outputs.id != '' }}
+        shell: bash
+        run: |
+          xcrun simctl shutdown '${{ steps.simulator.outputs.id }}' || true
+          xcrun simctl delete '${{ steps.simulator.outputs.id }}'
+      - name: Save diagnostics and result bundles
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: JXSegmentedView-diagnostics
+          path: |
+            ${{ runner.temp }}/diagnostics
+            !${{ runner.temp }}/diagnostics/Consumers/**/DerivedData/**
+          if-no-files-found: warn
+          retention-days: 14
