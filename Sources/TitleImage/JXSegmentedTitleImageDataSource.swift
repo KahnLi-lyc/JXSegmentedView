@@ -18,7 +18,7 @@ public enum JXSegmentedTitleImageType {
     case backgroundImage
 }
 
-public typealias LoadImageClosure = ((UIImageView, String) -> Void)
+public typealias LoadImageClosure = @MainActor (UIImageView, String) -> Void
 
 open class JXSegmentedTitleImageDataSource: JXSegmentedTitleDataSource {
     open var titleImageType: JXSegmentedTitleImageType = .rightImage

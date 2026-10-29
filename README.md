@@ -1,3 +1,6 @@
+> 自有 master 现面向 Swift 6.0+ 工具链、Swift 6 语言模式和 iOS 16+。
+> 升级前阅读 [Swift 6 迁移指南](docs/SWIFT6_MIGRATION.md)；原上游说明中的旧系统／工具链范围不再适用于当前 SPM 分发。
+
 > **Independently maintained SwiftPM fork (`master`)** — based on upstream
 > [pujiaxin33/JXSegmentedView 1.4.1](https://github.com/pujiaxin33/JXSegmentedView/tree/fbbf965d7396bd99ac1ce88a80b6c950b85313f6).
 > MIT license and upstream source organization are retained. Local patches fix

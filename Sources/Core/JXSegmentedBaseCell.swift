@@ -8,16 +8,13 @@
 
 import UIKit
 
-public typealias JXSegmentedCellSelectedAnimationClosure = (CGFloat)->()
+public typealias JXSegmentedCellSelectedAnimationClosure = @MainActor @Sendable (CGFloat)->()
 
+@MainActor
 open class JXSegmentedBaseCell: UICollectionViewCell, JXSegmentedViewRTLCompatible {
     open var itemModel: JXSegmentedBaseItemModel?
     open var animator: JXSegmentedAnimator?
     private var selectedAnimationClosureArray = [JXSegmentedCellSelectedAnimationClosure]()
-
-    deinit {
-        animator?.stop()
-    }
 
     open override func prepareForReuse() {
         super.prepareForReuse()
@@ -68,28 +65,33 @@ open class JXSegmentedBaseCell: UICollectionViewCell, JXSegmentedViewRTLCompatib
     open func startSelectedAnimationIfNeeded(itemModel: JXSegmentedBaseItemModel, selectedType: JXSegmentedViewItemSelectedType) {
         if itemModel.isSelectedAnimable && canStartSelectedAnimation(itemModel: itemModel, selectedType: selectedType) {
             //需要更新isTransitionAnimating，用于处理在过滤时，禁止响应点击，避免界面异常。
-            itemModel.isTransitionAnimating = true
-            animator?.progressClosure = {[weak self] (percent) in
-                guard self != nil else {
-                    return
-                }
-                for closure in self!.selectedAnimationClosureArray {
+            guard let animator else { return }
+            itemModel.trackTransition(with: animator)
+            animator.progressClosure = { [weak self, weak animator] percent in
+                guard let self, let animator, self.animator === animator else { return }
+                for closure in self.selectedAnimationClosureArray {
+                    guard self.animator === animator else { break }
                     closure(percent)
                 }
             }
-            animator?.completedClosure = {[weak self] in
-                itemModel.isTransitionAnimating = false
-                self?.selectedAnimationClosureArray.removeAll()
+            animator.completedClosure = { [weak self, weak animator] in
+                guard let animator else { return }
+                itemModel.finishTransition(with: animator)
+                if let self, self.animator === animator {
+                    self.selectedAnimationClosureArray.removeAll()
+                }
             }
-            animator?.start()
+            animator.start()
         }
     }
 
     open func reloadData(itemModel: JXSegmentedBaseItemModel, selectedType: JXSegmentedViewItemSelectedType) {
+        animator?.stop()
+        animator = nil
+        selectedAnimationClosureArray.removeAll()
         self.itemModel = itemModel
 
         if itemModel.isSelectedAnimable {
-            selectedAnimationClosureArray.removeAll()
             if canStartSelectedAnimation(itemModel: itemModel, selectedType: selectedType) {
                 animator = JXSegmentedAnimator()
                 animator?.duration = itemModel.selectedAnimationDuration

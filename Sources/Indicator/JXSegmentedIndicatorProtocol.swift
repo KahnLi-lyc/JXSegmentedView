@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 
+@MainActor
 public protocol JXSegmentedIndicatorProtocol: UIView {
     /// 是否需要将当前的indicator的frame转换到cell。辅助JXSegmentedTitleDataSourced的isTitleMaskEnabled属性使用。
     /// 如果添加了多个indicator，仅能有一个indicator的isIndicatorConvertToItemFrameEnabled为true。

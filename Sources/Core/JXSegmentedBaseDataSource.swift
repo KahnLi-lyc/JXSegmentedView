@@ -9,6 +9,7 @@
 import Foundation
 import  UIKit
 
+@MainActor
 open class JXSegmentedBaseDataSource: JXSegmentedViewDataSource {
     /// 最终传递给JXSegmentedView的数据源数组
     open var dataSource = [JXSegmentedBaseItemModel]()
@@ -41,11 +42,6 @@ open class JXSegmentedBaseDataSource: JXSegmentedViewDataSource {
     }
 
     private var animator: JXSegmentedAnimator?
-
-    deinit {
-        animator?.stop()
-        animator = nil
-    }
 
     public init() {
     }
@@ -119,6 +115,8 @@ open class JXSegmentedBaseDataSource: JXSegmentedViewDataSource {
     }
 
     open func refreshItemModel(_ segmentedView: JXSegmentedView, currentSelectedItemModel: JXSegmentedBaseItemModel, willSelectedItemModel: JXSegmentedBaseItemModel, selectedType: JXSegmentedViewItemSelectedType) {
+        animator?.stop()
+        animator = nil
         currentSelectedItemModel.isSelected = false
         willSelectedItemModel.isSelected = true
 
@@ -128,8 +126,8 @@ open class JXSegmentedBaseDataSource: JXSegmentedViewDataSource {
                 selectedType == .code {
                 animator = JXSegmentedAnimator()
                 animator?.duration = selectedAnimationDuration
-                animator?.progressClosure = {[weak self] (percent) in
-                    guard let self = self else { return }
+                animator?.progressClosure = {[weak self, weak segmentedView] (percent) in
+                    guard let self = self, let segmentedView else { return }
                     currentSelectedItemModel.itemWidthCurrentZoomScale = JXSegmentedViewTool.interpolate(from: currentSelectedItemModel.itemWidthSelectedZoomScale, to: currentSelectedItemModel.itemWidthNormalZoomScale, percent: percent)
                     currentSelectedItemModel.itemWidth = self.itemWidthWithZoom(at: currentSelectedItemModel.index, model: currentSelectedItemModel)
                     willSelectedItemModel.itemWidthCurrentZoomScale = JXSegmentedViewTool.interpolate(from: willSelectedItemModel.itemWidthNormalZoomScale, to: willSelectedItemModel.itemWidthSelectedZoomScale, percent: percent)

@@ -8,6 +8,7 @@
 
 import UIKit
 
+@MainActor
 public protocol JXSegmentedViewRTLCompatible: AnyObject {
     func segmentedViewShouldRTLLayout() -> Bool
     func segmentedView(horizontalFlipForView view: UIView?)

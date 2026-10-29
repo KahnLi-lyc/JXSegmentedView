@@ -51,3 +51,10 @@ package regressions, and merge into `master` before updating consumers.
 The one-time history reconciliation keeps the tested `spm` source tree; it does
 not adopt later upstream changes merely because their commits are ancestors.
 See [branching](BRANCHING.md) and the explicit [upstream review ledger](UPSTREAM_REVIEW.md).
+
+## Swift 6 maintenance
+
+Current SPM requirements: Swift tools 6.0, Swift 6 language mode, iOS 16.
+The adopted upstream release baseline is unchanged. Concurrency/lifecycle patches
+are fork-owned; see [migration guide](SWIFT6_MIGRATION.md) and actual validation.
+Original license, authorship and privacy resources are retained.

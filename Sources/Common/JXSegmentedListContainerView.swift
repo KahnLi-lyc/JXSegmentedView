@@ -17,6 +17,7 @@ public enum JXSegmentedListContainerType {
 }
 
 @objc
+@MainActor
 public protocol JXSegmentedListContainerViewListDelegate {
     /// 如果列表是VC，就返回VC.view
     /// 如果列表是View，就返回View自己
@@ -30,6 +31,7 @@ public protocol JXSegmentedListContainerViewListDelegate {
 }
 
 @objc
+@MainActor
 public protocol JXSegmentedListContainerViewDataSource {
     /// 返回list的数量
     func numberOfLists(in listContainerView: JXSegmentedListContainerView) -> Int
