@@ -301,3 +301,7 @@ QQ群： 112440276
 ## License
 
 JXSegmentedView is released under the MIT license.
+
+## Maintained UIKit Demo
+
+Open `Demo/JXSegmentedViewDemo.xcodeproj` and run scheme `JXSegmentedViewDemo`. This local-package UIKit app replaces the old `Example/` as the maintained demonstration entry. See [usage](Demo/README.md) and [coverage](Demo/COVERAGE.md).

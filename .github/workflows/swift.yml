@@ -10,7 +10,7 @@ permissions:
 jobs:
   ios:
     runs-on: macos-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       XCODEBUILD_JOBS: 2
     steps:
@@ -46,6 +46,14 @@ jobs:
           echo "id=$simulator_id" >> "$GITHUB_OUTPUT"
           xcrun simctl boot "$simulator_id"
           xcrun simctl bootstatus "$simulator_id" -b
+      - name: Install pinned XcodeGen and verify Demo project
+        shell: bash
+        run: |
+          curl --fail --location --retry 2 https://github.com/yonaskolb/XcodeGen/releases/download/2.46.0/xcodegen.zip -o "$RUNNER_TEMP/xcodegen.zip"
+          echo "4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806  $RUNNER_TEMP/xcodegen.zip" | shasum -a 256 -c -
+          unzip -q "$RUNNER_TEMP/xcodegen.zip" -d "$RUNNER_TEMP/xcodegen"
+          export PATH="$RUNNER_TEMP/xcodegen/xcodegen/bin:$PATH"
+          scripts/check-demo-project.sh
       - name: Test Swift 6 library with complete concurrency checks
         shell: bash
         run: |
@@ -62,12 +70,17 @@ jobs:
           set -o pipefail
           scripts/check-consumer.sh "$RUNNER_TEMP/diagnostics/Consumers" \
             2>&1 | tee "$RUNNER_TEMP/diagnostics/consumers.log"
+      - name: Test UIKit Demo through public APIs
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          scripts/test-demo.sh '${{ steps.simulator.outputs.id }}' "$RUNNER_TEMP/diagnostics/Demo"
       - name: Reject concurrency warning diagnostics
         if: always()
         shell: bash
         run: |
           shopt -s nullglob
-          logs=("$RUNNER_TEMP/diagnostics/"*.log "$RUNNER_TEMP/diagnostics/Consumers/"*.log)
+          logs=("$RUNNER_TEMP/diagnostics/"*.log "$RUNNER_TEMP/diagnostics/Consumers/"*.log "$RUNNER_TEMP/diagnostics/Demo/"*.log)
           if [[ ${#logs[@]} -gt 0 ]]; then
             scripts/check-concurrency-diagnostics.sh "${logs[@]}"
           fi
@@ -85,5 +98,6 @@ jobs:
           path: |
             ${{ runner.temp }}/diagnostics
             !${{ runner.temp }}/diagnostics/Consumers/**/DerivedData/**
+            !${{ runner.temp }}/diagnostics/Demo/DerivedData/**
           if-no-files-found: warn
           retention-days: 14
